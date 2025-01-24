@@ -2,6 +2,7 @@
 
 namespace Firefly\FilamentBlog\Models;
 
+use Awcodes\Curator\Models\Media;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
@@ -16,6 +17,7 @@ use FilamentTiptapEditor\TiptapEditor;
 use Firefly\FilamentBlog\Database\Factories\PostFactory;
 use Firefly\FilamentBlog\Enums\PostStatus;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,6 +35,7 @@ class Post extends Model
         'title',
         'slug',
         'sub_title',
+        'excerpt',
         'body',
         'status',
         'published_at',
@@ -236,5 +239,21 @@ class Post extends Model
     public function getTable()
     {
         return config('filamentblog.tables.prefix') . 'posts';
+    }
+
+    /**
+     * Get the cover image url.
+     */
+    protected function coverPhotoUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?string {
+                if (empty($this->cover_photo_path)) {
+                    return null;
+                }
+
+                return Media::find($this->cover_photo_path)?->url ?? null;
+            },
+        );
     }
 }

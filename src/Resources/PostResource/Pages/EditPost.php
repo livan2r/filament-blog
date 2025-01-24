@@ -6,6 +6,7 @@ use Filament\Actions;
 use App\Filament\Resources\BaseClasses\EditRecord;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\EditRecord\Concerns\Translatable;
+use Filament\Support\Enums\MaxWidth;
 use Firefly\FilamentBlog\Enums\PostStatus;
 use Firefly\FilamentBlog\Resources\PostResource;
 
@@ -25,7 +26,11 @@ class EditPost extends EditRecord
                 ->icon('heroicon-o-arrow-left'),
             Actions\LocaleSwitcher::make(),
             Actions\ViewAction::make()
-                ->icon('heroicon-o-eye'),
+                ->icon('heroicon-o-eye')
+                ->slideOver()
+                ->modalIcon('heroicon-o-eye')
+                ->modalIconColor('primary')
+                ->modalWidth(MaxWidth::ThreeExtraLarge),
             Actions\DeleteAction::make()
                 ->icon('heroicon-o-trash'),
         ];

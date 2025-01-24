@@ -59,7 +59,7 @@ return [
         ],
 
         'cover_photo_path' => [
-            'label' => 'Cover Photo',
+            'label' => 'Cover',
             'desc'  => 'This cover image is used in your blog post as a feature image. Recommended image size 1200 X 628',
         ],
 

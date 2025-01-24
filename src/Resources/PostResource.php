@@ -5,9 +5,11 @@ namespace Firefly\FilamentBlog\Resources;
 use App\Filament\Resources\Helper;
 use Awcodes\Curator\Components\Forms\CuratorPicker;
 use Awcodes\Curator\Components\Tables\CuratorColumn;
+use Awcodes\Curator\Models\Media;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -15,6 +17,8 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
 use Filament\Infolists\Components\Fieldset;
+use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -23,6 +27,7 @@ use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\ActionSize;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -37,6 +42,7 @@ use Firefly\FilamentBlog\Resources\PostResource\Pages\ManagePostComments;
 use Firefly\FilamentBlog\Resources\PostResource\Pages\ViewPost;
 use Firefly\FilamentBlog\Resources\PostResource\Widgets\BlogPostPublishedChart;
 use Firefly\FilamentBlog\Tables\Columns\UserPhotoName;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class PostResource extends Resource
@@ -259,7 +265,11 @@ class PostResource extends Resource
                 Tables\Actions\ViewAction::make()
                     ->hiddenLabel()
                     ->size(ActionSize::Medium)
-                    ->tooltip(__('filament-actions::view.single.label')),
+                    ->tooltip(__('filament-actions::view.single.label'))
+                    ->slideOver()
+                    ->modalIcon('heroicon-o-eye')
+                    ->modalIconColor('primary')
+                    ->modalWidth(MaxWidth::ThreeExtraLarge),
                 Tables\Actions\EditAction::make()
                     ->hiddenLabel()
                     ->size(ActionSize::Medium)
@@ -279,42 +289,32 @@ class PostResource extends Resource
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist->schema([
-            Section::make('Post')
-                ->schema([
-                    Fieldset::make('General')
-                        ->schema([
-                            TextEntry::make('title'),
-                            TextEntry::make('slug'),
-                            TextEntry::make('sub_title'),
-                        ]),
-                    Fieldset::make('Publish Information')
-                        ->schema([
-                            TextEntry::make('status')
-                                ->badge()->color(function ($state) {
-                                    return $state->getColor();
-                                }),
-                            TextEntry::make('published_at')->visible(function (Post $record) {
-                                return $record->status === PostStatus::PUBLISHED;
-                            }),
-
-                            TextEntry::make('scheduled_for')->visible(function (Post $record) {
-                                return $record->status === PostStatus::SCHEDULED;
-                            }),
-                        ]),
-                    Fieldset::make('Description')
-                        ->schema([
-                            TextEntry::make('body')
-                                ->html()
-                                ->columnSpanFull(),
-                        ]),
-                ]),
+            ImageEntry::make('cover_photo_url')
+                ->hiddenLabel(),
+            TextEntry::make('status')
+                ->badge()->color(function ($state) {
+                    return $state->getColor();
+                }),
+            TextEntry::make('published_at')->visible(function (Post $record) {
+                return $record->status === PostStatus::PUBLISHED;
+            }),
+            TextEntry::make('scheduled_for')->visible(function (Post $record) {
+                return $record->status === PostStatus::SCHEDULED;
+            }),
+            TextEntry::make('excerpt')
+                ->hiddenLabel()
+                ->columnSpanFull(),
+            TextEntry::make('body')
+                ->hiddenLabel()
+                ->markdown()
+                ->columnSpanFull()
         ]);
     }
 
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
-            ViewPost::class,
+            //ViewPost::class,
             ManaePostSeoDetail::class,
             ManagePostComments::class,
             EditPost::class,
@@ -342,7 +342,7 @@ class PostResource extends Resource
             'index' => \Firefly\FilamentBlog\Resources\PostResource\Pages\ListPosts::route('/'),
             'create' => \Firefly\FilamentBlog\Resources\PostResource\Pages\CreatePost::route('/create'),
             'edit' => \Firefly\FilamentBlog\Resources\PostResource\Pages\EditPost::route('/{record}/edit'),
-            'view' => \Firefly\FilamentBlog\Resources\PostResource\Pages\ViewPost::route('/{record}'),
+            //'view' => \Firefly\FilamentBlog\Resources\PostResource\Pages\ViewPost::route('/{record}'),
             'comments' => \Firefly\FilamentBlog\Resources\PostResource\Pages\ManagePostComments::route('/{record}/comments'),
             'seoDetail' => \Firefly\FilamentBlog\Resources\PostResource\Pages\ManaePostSeoDetail::route('/{record}/seo-details'),
         ];
