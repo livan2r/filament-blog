@@ -51,8 +51,8 @@ class CreatePost extends CreateRecord
         }
     }
 
-    protected function getRedirectUrl(): string
+    /*protected function getRedirectUrl(): string
     {
         return SeoDetailResource::getUrl('create', ['post_id' => $this->record->id]);
-    }
+    }*/
 }

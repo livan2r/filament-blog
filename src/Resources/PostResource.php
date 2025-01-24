@@ -2,7 +2,17 @@
 
 namespace Firefly\FilamentBlog\Resources;
 
+use App\Filament\Resources\Helper;
+use Awcodes\Curator\Components\Forms\CuratorPicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -13,8 +23,11 @@ use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use FilamentTiptapEditor\TiptapEditor;
 use Firefly\FilamentBlog\Enums\PostStatus;
+use Firefly\FilamentBlog\Models\Category;
 use Firefly\FilamentBlog\Models\Post;
+use Firefly\FilamentBlog\Models\Tag;
 use Firefly\FilamentBlog\Resources\PostResource\Pages\EditPost;
 use Firefly\FilamentBlog\Resources\PostResource\Pages\ManaePostSeoDetail;
 use Firefly\FilamentBlog\Resources\PostResource\Pages\ManagePostComments;
@@ -46,8 +59,134 @@ class PostResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema(Post::getForm());
+        return Helper::twoColumnsForm($form,
+            firstColumn: [
+                \Filament\Forms\Components\Section::make(__('filament-blog::admin.post.details'))
+                    ->icon('heroicon-o-folder')
+                    ->iconColor('primary')
+                    ->compact()
+                    ->schema([
+                        Select::make('category_id')
+                            ->label(__('filament-blog::admin.post.category.label'))
+                            ->helperText(__('filament-blog::admin.post.category.desc'))
+                            ->multiple()
+                            ->preload()
+                            ->createOptionForm(Category::getForm())
+                            ->searchable()
+                            ->relationship('categories', 'name'),
+
+                        ToggleButtons::make('status')
+                            ->label(__('filament-blog::admin.post.status.label'))
+                            ->helperText(__('filament-blog::admin.post.status.desc'))
+                            ->live()
+                            ->inline()
+                            ->inlineLabel(false)
+                            ->options(PostStatus::class)
+                            ->required(),
+
+                        TextInput::make('title')
+                            ->prefixIcon('heroicon-o-tag')
+                            ->prefixIconColor('secondary')
+                            ->label(__('filament-blog::admin.post.title.label'))
+                            ->helperText(__('filament-blog::admin.post.title.desc'))
+                            ->live(true)
+                            ->afterStateUpdated(function (Set $set, ?string $state) {
+                                $set('slug', Str::slug($state));
+                                $set('photo_alt_text', $state);
+                            })
+                            ->required()
+                            ->unique(config('filamentblog.tables.prefix').'posts', 'title', null, 'id')
+                            ->maxLength(255),
+
+                        Hidden::make('photo_alt_text'),
+
+                        TextInput::make('slug')
+                            ->prefixIcon('heroicon-o-tag')
+                            ->prefixIconColor('secondary')
+                            ->label(__('filament-blog::admin.post.slug.label'))
+                            ->helperText(__('filament-blog::admin.post.slug.desc'))
+                            ->maxLength(255),
+
+                        TextInput::make('sub_title')
+                            ->prefixIcon('heroicon-o-tag')
+                            ->prefixIconColor('secondary')
+                            ->label(__('filament-blog::admin.post.sub_title.label'))
+                            ->helperText(__('filament-blog::admin.post.sub_title.desc'))
+                            ->maxLength(255)
+                            ->required(),
+
+                        CuratorPicker::make('cover_photo_path')
+                            ->label(__('filament-blog::admin.post.cover_photo_path.label'))
+                            ->color('primary')
+                            ->outlined(false)
+                            ->constrained()
+                            ->required()
+                            ->helperText(__('filament-blog::admin.post.cover_photo_path.desc')),
+
+                        Textarea::make('excerpt')
+                            ->label(__('filament-blog::admin.post.excerpt.label'))
+                            ->helperText(__('filament-blog::admin.post.excerpt.desc'))
+                            ->rows(6)
+                            ->required()
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2)
+                    ->inlineLabel(false),
+
+                \Filament\Forms\Components\Section::make(__('filament-blog::admin.post.body.label'))
+                    ->icon('heroicon-o-document-text')
+                    ->iconColor('primary')
+                    ->compact()
+                    ->schema([
+                        MarkdownEditor::make('body')
+                            ->hiddenLabel()
+                            ->minHeight('30rem')
+                            ->maxHeight('40rem')
+                            ->required()
+                            ->columnSpanFull(),
+                    ])
+                    ->inlineLabel(false),
+            ],
+            secondColumn: [
+                \Filament\Forms\Components\Section::make(__('filament-blog::admin.post.adjustments'))
+                    ->icon('heroicon-o-cog')
+                    ->iconColor('primary')
+                    ->compact()
+                    ->schema([
+                        Select::make('tag_id')
+                            ->label(__('filament-blog::admin.post.tag.label'))
+                            ->helperText(__('filament-blog::admin.post.tag.desc'))
+                            ->multiple()
+                            ->preload()
+                            ->createOptionForm(Tag::getForm())
+                            ->searchable()
+                            ->relationship('tags', 'name')
+                            ->columnSpanFull(),
+
+                        DateTimePicker::make('scheduled_for')
+                            ->label(__('filament-blog::admin.post.scheduled_for.label'))
+                            ->helperText(__('filament-blog::admin.post.scheduled_for.desc'))
+                            ->visible(function ($get) {
+                                return $get('status') === PostStatus::SCHEDULED->value;
+                            })
+                            ->required(function ($get) {
+                                return $get('status') === PostStatus::SCHEDULED->value;
+                            })
+                            ->minDate(now()->addMinutes(5))
+                            ->native(false),
+
+                        Select::make(config('filamentblog.user.foreign_key'))
+                            ->label(__('filament-blog::admin.post.author.label'))
+                            ->helperText(__('filament-blog::admin.post.author.desc'))
+                            ->prefixIcon('heroicon-o-cursor-arrow-rays')
+                            ->prefixIconColor('secondary')
+                            ->relationship('user', config('filamentblog.user.columns.name'))
+                            ->nullable(false)
+                            ->default(auth()->id()),
+                    ])->inlineLabel(false),
+            ],
+            helperText: __('filament-blog::admin.post.helper_text')
+        );
     }
 
     public static function table(Table $table): Table

@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
+use Spatie\Translatable\HasTranslations;
 
 class Tag extends Model
 {
-    use HasFactory;
+    use HasFactory,
+        HasTranslations;
 
     protected $fillable = [
         'name',
@@ -21,6 +23,10 @@ class Tag extends Model
 
     protected $casts = [
         'id' => 'integer',
+    ];
+
+    public array $translatable = [
+        'name',
     ];
 
     public function posts(): BelongsToMany
@@ -33,6 +39,10 @@ class Tag extends Model
     {
         return [
             TextInput::make('name')
+                ->prefixIcon('heroicon-o-tag')
+                ->prefixIconColor('secondary')
+                ->label(__('filament-blog::admin.tag.name.label'))
+                ->helperText(__('filament-blog::admin.tag.name.desc'))
                 ->live(true)->afterStateUpdated(fn(Set $set, ?string $state) => $set(
                     'slug',
                     Str::slug($state)
@@ -42,6 +52,10 @@ class Tag extends Model
                 ->maxLength(50),
 
             TextInput::make('slug')
+                ->prefixIcon('heroicon-o-tag')
+                ->prefixIconColor('secondary')
+                ->label(__('filament-blog::admin.tag.slug.label'))
+                ->helperText(__('filament-blog::admin.tag.slug.desc'))
                 ->unique(config('filamentblog.tables.prefix').'tags', 'slug', null, 'id')
                 ->readOnly()
                 ->maxLength(155),

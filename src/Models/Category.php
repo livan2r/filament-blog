@@ -39,6 +39,11 @@ class Category extends Model
     {
         return [
             TextInput::make('name')
+                ->prefixIcon('heroicon-o-tag')
+                ->prefixIconColor('secondary')
+                ->label(__('filament-blog::admin.category.name.label'))
+                ->helperText(__('filament-blog::admin.category.name.desc'))
+                ->live(true)
                 ->live(true)
                 ->afterStateUpdated(function (Get $get, Set $set, ?string $operation, ?string $old, ?string $state) {
 
@@ -49,6 +54,10 @@ class Category extends Model
                 ->maxLength(155),
 
             TextInput::make('slug')
+                ->prefixIcon('heroicon-o-tag')
+                ->prefixIconColor('secondary')
+                ->label(__('filament-blog::admin.category.slug.label'))
+                ->helperText(__('filament-blog::admin.category.slug.desc'))
                 ->unique(config('filamentblog.tables.prefix').'categories', 'slug', null, 'id')
                 ->readOnly()
                 ->maxLength(255),
