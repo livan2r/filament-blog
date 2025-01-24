@@ -57,7 +57,7 @@ class PostResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return strval(Post::count());
+        return strval(Post::where('status', 'published')->count());
     }
 
     public static function form(Form $form): Form
