@@ -4,6 +4,7 @@ namespace Firefly\FilamentBlog\Resources;
 
 use App\Filament\Resources\Helper;
 use Awcodes\Curator\Components\Forms\CuratorPicker;
+use Awcodes\Curator\Components\Tables\CuratorColumn;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\MarkdownEditor;
@@ -21,7 +22,9 @@ use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Concerns\Translatable;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\ActionSize;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use FilamentTiptapEditor\TiptapEditor;
 use Firefly\FilamentBlog\Enums\PostStatus;
@@ -194,21 +197,41 @@ class PostResource extends Resource
         return $table
             ->deferLoading()
             ->columns([
+                TextColumn::make('id')
+                    ->label(__('admin.common.id.label'))
+                    ->sortable(),
+                CuratorColumn::make('cover_photo_path')
+                    ->label(__('filament-blog::admin.post.cover_photo_path.label'))
+                    ->disk('media')
+                    ->width(80),
                 Tables\Columns\TextColumn::make('title')
+                    ->label(__('filament-blog::admin.post.title.label'))
                     ->description(function (Post $record) {
-                        return Str::limit($record->sub_title, 40);
+                        return Str::limit($record->sub_title, 100);
                     })
-                    ->searchable()->limit(20),
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('categories.name')
+                    ->label(__('filament-blog::admin.post.category.label'))
+                    ->badge()
+                    ->color('primary')
+                    ->inline()
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('status')
+                    ->label(__('filament-blog::admin.post.status.label'))
                     ->badge()
                     ->color(function ($state) {
                         return $state->getColor();
-                    }),
-                Tables\Columns\ImageColumn::make('cover_photo_path')->label('Cover Photo'),
-
+                    })
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('published_at')
+                    ->label(__('filament-blog::admin.post.published_at.label'))
+                    ->badge()
+                    ->dateTime()
+                    ->sortable(),
                 UserPhotoName::make('user')
-                    ->label('Author'),
-
+                    ->label(__('filament-blog::admin.post.author.label')),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -220,16 +243,31 @@ class PostResource extends Resource
             ])->defaultSort('id', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('user')
+                    ->label(__('filament-blog::admin.post.author.label'))
                     ->relationship('user', config('filamentblog.user.columns.name'))
+                    ->searchable()
+                    ->preload()
+                    ->multiple(),
+                Tables\Filters\SelectFilter::make('category_id')
+                    ->label(__('filament-blog::admin.post.category.label'))
+                    ->relationship('categories', 'name')
                     ->searchable()
                     ->preload()
                     ->multiple(),
             ])
             ->actions([
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\ViewAction::make(),
-                ]),
+                Tables\Actions\ViewAction::make()
+                    ->hiddenLabel()
+                    ->size(ActionSize::Medium)
+                    ->tooltip(__('filament-actions::view.single.label')),
+                Tables\Actions\EditAction::make()
+                    ->hiddenLabel()
+                    ->size(ActionSize::Medium)
+                    ->tooltip(__('filament-actions::edit.single.label')),
+                Tables\Actions\DeleteAction::make()
+                    ->hiddenLabel()
+                    ->size(ActionSize::Medium)
+                    ->tooltip(__('filament-actions::delete.single.label')),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

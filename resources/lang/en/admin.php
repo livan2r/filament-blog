@@ -62,6 +62,11 @@ return [
             'label' => 'Cover Photo',
             'desc'  => 'This cover image is used in your blog post as a feature image. Recommended image size 1200 X 628',
         ],
+
+        'published_at' => [
+            'label' => 'Published At',
+            'desc'  => 'The date and time the post was published',
+        ],
     ],
 
     'category' => [

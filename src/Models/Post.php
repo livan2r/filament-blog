@@ -63,6 +63,7 @@ class Post extends Model
         'title',
         'sub_title',
         'body',
+        'photo_alt_text',
     ];
 
     protected static function newFactory()
