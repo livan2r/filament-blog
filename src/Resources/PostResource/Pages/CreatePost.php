@@ -3,15 +3,32 @@
 namespace Firefly\FilamentBlog\Resources\PostResource\Pages;
 
 use Carbon\Carbon;
-use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Resources\BaseClasses\CreateRecord;
+use Filament\Resources\Pages\CreateRecord\Concerns\Translatable;
 use Firefly\FilamentBlog\Events\BlogPublished;
 use Firefly\FilamentBlog\Jobs\PostScheduleJob;
 use Firefly\FilamentBlog\Resources\PostResource;
 use Firefly\FilamentBlog\Resources\SeoDetailResource;
+use Filament\Actions\Action;
+use Filament\Actions;
 
 class CreatePost extends CreateRecord
 {
+    Use Translatable;
+
     protected static string $resource = PostResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('back')
+                ->url(PostResource::getUrl())
+                ->label(__('admin.return'))
+                ->color('gray')
+                ->icon('heroicon-o-arrow-left'),
+            Actions\LocaleSwitcher::make(),
+        ];
+    }
 
     //    protected function mutateFormDataBeforeCreate(array $data): array
     //    {

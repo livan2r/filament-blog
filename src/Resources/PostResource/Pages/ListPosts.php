@@ -10,12 +10,16 @@ use Firefly\FilamentBlog\Resources\PostResource\Widgets\BlogPostPublishedChart;
 
 class ListPosts extends ListRecords
 {
+    use ListRecords\Concerns\Translatable;
+
     protected static string $resource = PostResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\LocaleSwitcher::make(),
+            Actions\CreateAction::make()
+                ->icon('heroicon-o-plus'),
         ];
     }
 

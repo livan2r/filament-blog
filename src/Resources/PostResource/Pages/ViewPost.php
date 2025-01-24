@@ -3,7 +3,9 @@
 namespace Firefly\FilamentBlog\Resources\PostResource\Pages;
 
 use Filament\Actions\Action;
+use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Resources\Pages\ViewRecord\Concerns\Translatable;
 use Firefly\FilamentBlog\Events\BlogPublished;
 use Firefly\FilamentBlog\Models\Post;
 use Firefly\FilamentBlog\Resources\PostResource;
@@ -11,6 +13,8 @@ use Illuminate\Contracts\Support\Htmlable;
 
 class ViewPost extends ViewRecord
 {
+    Use Translatable;
+
     protected static string $resource = PostResource::class;
 
     public function getTitle(): string|Htmlable
@@ -23,6 +27,14 @@ class ViewPost extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('back')
+                ->url(PostResource::getUrl())
+                ->label(__('admin.return'))
+                ->color('gray')
+                ->icon('heroicon-o-arrow-left'),
+            Actions\LocaleSwitcher::make(),
+            Actions\EditAction::make()
+                ->icon('heroicon-o-pencil'),
             Action::make('sendNotification')
                 ->label('Send Notification')
                 ->requiresConfirmation()

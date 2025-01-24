@@ -22,10 +22,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Spatie\Translatable\HasTranslations;
 
 class Post extends Model
 {
-    use HasFactory;
+    use HasFactory,
+        HasTranslations;
 
     protected $fillable = [
         'title',
@@ -55,6 +57,12 @@ class Post extends Model
         'scheduled_for' => 'datetime',
         'status' => PostStatus::class,
         'user_id' => 'integer',
+    ];
+
+    public array $translatable = [
+        'title',
+        'sub_title',
+        'body',
     ];
 
     protected static function newFactory()
