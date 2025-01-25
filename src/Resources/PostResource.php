@@ -215,6 +215,7 @@ class PostResource extends Resource
                     ->description(function (Post $record) {
                         return Str::limit($record->sub_title, 100);
                     })
+                    ->wrap()
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('categories.name')
@@ -235,9 +236,14 @@ class PostResource extends Resource
                     ->label(__('filament-blog::admin.post.published_at.label'))
                     ->badge()
                     ->dateTime()
+                    ->formatStateUsing(function ($state) {
+                        return $state->format('Y-m-d H:i');
+                    })
                     ->sortable(),
                 UserPhotoName::make('user')
-                    ->label(__('filament-blog::admin.post.author.label')),
+                    ->label(__('filament-blog::admin.post.author.label'))
+                    ->alignCenter()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

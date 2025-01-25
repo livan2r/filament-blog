@@ -3,13 +3,15 @@
 namespace Firefly\FilamentBlog\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Awcodes\Curator\Models\Media;
+use Filament\Models\Contracts\HasAvatar;
 use Firefly\FilamentBlog\Database\Factories\UserFactory;
 use Firefly\FilamentBlog\Traits\HasBlog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasAvatar
 {
     use HasBlog, HasFactory, Notifiable;
 
@@ -57,5 +59,19 @@ class User extends Authenticatable
     protected static function newFactory()
     {
         return new UserFactory();
+    }
+
+    /**
+     * Get the user's avatar URL.
+     *
+     * @return string|null
+     */
+    public function getFilamentAvatarUrl(): ?string
+    {
+        if (empty($this->avatar)) {
+            return null;
+        }
+
+        return Media::find($this->avatar)?->url ?? null;
     }
 }
