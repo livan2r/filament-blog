@@ -3,6 +3,7 @@
 namespace Firefly\FilamentBlog\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Services\Website;
 use Awcodes\Curator\Models\Media;
 use Filament\Models\Contracts\HasAvatar;
 use Firefly\FilamentBlog\Database\Factories\UserFactory;
@@ -69,7 +70,7 @@ class User extends Authenticatable implements HasAvatar
     public function getFilamentAvatarUrl(): ?string
     {
         if (empty($this->avatar)) {
-            return null;
+            return Website::make()->getAvatar($this->email, 40);
         }
 
         return Media::find($this->avatar)?->url ?? null;
