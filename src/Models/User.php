@@ -74,6 +74,7 @@ class User extends Authenticatable implements HasAvatar
             return Website::make()->getAvatar($this->email, 40);
         }
 
-        return Storage::disk('media')->url($this->avatar) ?? null;
+        $media = Media::find($this->avatar)?->url ?? null;
+        return $media ?? Storage::disk('media')->url($this->avatar);
     }
 }
