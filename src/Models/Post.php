@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Spatie\LaravelMarkdown\MarkdownRenderer;
 use Spatie\Translatable\HasTranslations;
 
 class Post extends Model
@@ -93,6 +94,23 @@ class Post extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(config('filamentblog.user.model'), config('filamentblog.user.foreign_key'));
+    }
+
+    /**
+     * Get the article converted from markdown to html.
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    protected function article(): Attribute
+    {
+        return Attribute::make(
+            get: function (): string {
+                if (empty($this->body)) {
+                    return '';
+                }
+
+                return app(MarkdownRenderer::class)->toHtml($this->body);
+            },
+        );
     }
 
     public function seoDetail()
