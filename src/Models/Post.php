@@ -16,6 +16,7 @@ use Filament\Forms\Set;
 use FilamentTiptapEditor\TiptapEditor;
 use Firefly\FilamentBlog\Database\Factories\PostFactory;
 use Firefly\FilamentBlog\Enums\PostStatus;
+use Firefly\FilamentBlog\Services\SEOService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -68,12 +69,12 @@ class Post extends Model
         'sub_title',
         'body',
         'photo_alt_text',
-        'excerpt'
+        'excerpt',
     ];
 
     protected static function newFactory()
     {
-        return new PostFactory();
+        return new PostFactory;
     }
 
     public function categories()
@@ -88,7 +89,7 @@ class Post extends Model
 
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(Tag::class,config('filamentblog.tables.prefix').'post_'.config('filamentblog.tables.prefix').'tag');
+        return $this->belongsToMany(Tag::class, config('filamentblog.tables.prefix').'post_'.config('filamentblog.tables.prefix').'tag');
     }
 
     public function user(): BelongsTo
@@ -97,18 +98,23 @@ class Post extends Model
     }
 
     /**
-     * Get the article converted from markdown to html.
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     * Get the article converted from markdown to html with table of contents.
      */
     protected function article(): Attribute
     {
         return Attribute::make(
-            get: function (): string {
+            get: function (): array {
                 if (empty($this->body)) {
-                    return '';
+                    return [
+                        'table' => [],
+                        'content' => '',
+                    ];
                 }
 
-                return app(MarkdownRenderer::class)->toHtml($this->body);
+                $html = app(MarkdownRenderer::class)->toHtml($this->body);
+                $service = new SEOService();
+
+                return $service->processArticleHtml($html);
             },
         );
     }
@@ -257,7 +263,7 @@ class Post extends Model
 
     public function getTable()
     {
-        return config('filamentblog.tables.prefix') . 'posts';
+        return config('filamentblog.tables.prefix').'posts';
     }
 
     /**
