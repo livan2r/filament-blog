@@ -111,8 +111,9 @@ class Post extends Model
                     ];
                 }
 
-                $html = app(MarkdownRenderer::class)->toHtml($this->body);
                 $service = new SEOService();
+                $html = app(MarkdownRenderer::class)
+                    ->toHtml($service->replaceVariables($this->body));
 
                 return $service->processArticleHtml($html);
             },

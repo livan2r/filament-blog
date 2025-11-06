@@ -6,6 +6,10 @@ use Illuminate\Support\Str;
 
 class SEOService
 {
+    protected ?string $title = null;
+
+    protected ?string $description = null;
+
     public function setTitle(string $title)
     {
         $this->title = $title;
@@ -82,5 +86,22 @@ class SEOService
             'table' => $table,
             'content' => $content,
         ];
+    }
+
+    /**
+     * Replace variables in HTML content.
+     *
+     * Supported variables:
+     * - {APP_URL} => config('app.url')
+     * - {LOCALE} => app()->getLocale()
+     */
+    public function replaceVariables(string $body): string
+    {
+        $variables = [
+            '{APP_URL}' => config('app.url'),
+            '{LOCALE}' => app()->getLocale(),
+        ];
+
+        return str_replace(array_keys($variables), array_values($variables), $body);
     }
 }

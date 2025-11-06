@@ -2,6 +2,7 @@
 
 namespace Firefly\FilamentBlog\Resources\PostResource\Pages;
 
+use App\Services\Website;
 use Filament\Actions;
 use App\Filament\Resources\BaseClasses\EditRecord;
 use Filament\Actions\Action;
@@ -25,6 +26,14 @@ class EditPost extends EditRecord
                 ->color('gray')
                 ->icon('heroicon-o-arrow-left'),
             Actions\LocaleSwitcher::make(),
+            Action::make(__('admin.cache.flush'))
+                ->icon('heroicon-o-arrow-path')
+                ->button()
+                ->requiresConfirmation()
+                ->modalHeading(__('admin.cache.flush'))
+                ->modalDescription(__('admin.cache.msg', ['model' => __('admin.website')]))
+                ->color('warning')
+                ->action(fn() => Website::make()->clearCache()),
             Actions\ViewAction::make()
                 ->icon('heroicon-o-eye')
                 ->slideOver()
