@@ -120,6 +120,19 @@ class Post extends Model
         );
     }
 
+    /**
+     * Get the excerpt converted from markdown to html
+     */
+    protected function excerptHtml(): Attribute
+    {
+        return Attribute::make(
+            get: function (): string {
+                return app(MarkdownRenderer::class)
+                    ->toHtml($this->excerpt);
+            },
+        );
+    }
+
     public function seoDetail()
     {
         return $this->hasOne(SeoDetail::class);
